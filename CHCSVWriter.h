@@ -53,14 +53,19 @@
 
 - (NSError *) error;
 
-- (void) writeField:(id)field;
-- (void) writeFields:(id)field, ... NS_REQUIRES_NIL_TERMINATION;
+// here a field will be quoted if it contains an invalid character
+- (void) writeQuotedField:(id)field;
+- (void) writeQuotedFields:(id)field, ... NS_REQUIRES_NIL_TERMINATION;
 
-- (void) writeLine;
-- (void) writeLineOfFields:(id)field, ... NS_REQUIRES_NIL_TERMINATION;
-- (void) writeLineWithFields:(NSArray *)fields;
+- (void) writeNewLine;
+- (void) writeLineOfQuotedFields:(id)field, ... NS_REQUIRES_NIL_TERMINATION;
+- (void) writeLineWithQuotedFields:(NSArray *)fields;
 
 - (void) writeCommentLine:(id)comment;
+
+// here any invalid character will be removed (replaced with a space) from a field before it is written 
+- (void) writeFilteredField:(id)field;
+- (void) writeFilteredFields:(id)field, ... NS_REQUIRES_NIL_TERMINATION;
 
 - (void) closeFile;
 

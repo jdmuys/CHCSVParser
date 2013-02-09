@@ -174,7 +174,7 @@
 	CHCSVWriter * writer = [[CHCSVWriter alloc] initWithCSVFile:csvFile atomic:atomically];
 	[writer setDelimiter:delimiter];
 	for (NSArray * row in self) {
-		[writer writeLineWithFields:row];
+		[writer writeLineWithQuotedFields:row];
 	}
 	
 	ok = ([writer error] == nil);
@@ -195,7 +195,7 @@
     CHCSVWriter *writer = [[CHCSVWriter alloc] initForWritingToString];
     [writer setDelimiter:delimiter];
     for (NSArray *array in self) {
-        [writer writeLineWithFields:array];
+        [writer writeLineWithQuotedFields:array];
     }
     NSString *string = [writer stringValue];
     if (!string && error) {

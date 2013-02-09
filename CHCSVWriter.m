@@ -126,7 +126,7 @@
     }
 }
 
-- (void) writeField:(id)field {
+- (void) writeQuotedField:(id)field {
 	hasStarted = YES;
 	NSMutableString * write = [[field description] mutableCopy];
 	
@@ -145,26 +145,59 @@
 	currentField++;
 }
 
-- (void) writeFields:(id)field, ... {
+- (void) writeFilteredField:(id)field
+{
+	hasStarted = YES;
+	NSMutableString * write = [[field description] mutableCopy];
+	
+	if (currentField > 0) {
+        [self _writeString:delimiter];
+	}
+	
+	NSArray *pieces = [write componentsSeparatedByCharactersInSet:illegalCharacters];
+	NSString *filteredString = [pieces componentsJoinedByString:@" "];
+	
+    [self _writeString:filteredString];
+	currentField++;	
+}
+
+
+- (void) writeQuotedFields:(id)field, ... {
 	if (field == nil) { return; }
 	
-	[self writeField:field];
+	[self writeQuotedField:field];
 	
 	va_list args;
 	va_start(args, field);
 	id next = nil;
 	while ((next = va_arg(args, id))) {
-		[self writeField:next];
+		[self writeQuotedField:next];
 	}
 	va_end(args);
 }
 
-- (void) writeLine {
+- (void) writeFilteredFields:(id)field, ... {
+	if (field == nil) { return; }
+	
+	[self writeQuotedField:field];
+	
+	va_list args;
+	va_start(args, field);
+	id next = nil;
+	while ((next = va_arg(args, id))) {
+		[self writeFilteredField:next];
+	}
+	va_end(args);
+}
+
+
+
+- (void) writeNewLine {
     [self _writeString:@"\n"];
 	currentField = 0;
 }
 
-- (void) writeLineOfFields:(id)field, ... {
+- (void) writeLineOfQuotedFields:(id)field, ... {
 	if (field == nil) { return; }
 	NSMutableArray *fields = [NSMutableArray arrayWithObject:field];
 	va_list args;
@@ -173,22 +206,22 @@
 	while ((next = va_arg(args, id))) {
 		[fields addObject:next];
 	}
-	[self writeLineWithFields:fields];
+	[self writeLineWithQuotedFields:fields];
 	va_end(args);
 }
 
-- (void) writeLineWithFields:(NSArray *)fields {
+- (void) writeLineWithQuotedFields:(NSArray *)fields {
 	for (id field in fields) {
-		[self writeField:field];
+		[self writeQuotedField:field];
 	}
-	[self writeLine];
+	[self writeNewLine];
 }
 
 - (void) writeCommentLine:(id)comment {
-	if (currentField > 0) { [self writeLine]; }
+	if (currentField > 0) { [self writeNewLine]; }
     [self _writeString:@"#"];
     [self _writeString:comment];
-	[self writeLine];
+	[self writeNewLine];
 }
 
 - (void) closeFile {
